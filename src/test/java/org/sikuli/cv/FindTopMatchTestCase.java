@@ -59,38 +59,38 @@ public class FindTopMatchTestCase extends TestCase {
       };
       
       
-    String[] names = new String[] {"sikuliorgbanner","xpdesktop","macdesktop","xppricingapp"};
-    
-    for (String name : names){
-
-       FinderTestImage findertestsuite = new FinderTestImage(name);
-
-       int n = findertestsuite.getTestCases().size();
-       for (int i=0; i < n; ++i){
-
-          FinderTestTarget ts = findertestsuite.getTestTarget(i);        
-          TestCase tc = new FindTopMatchTestCase(ts);
-          suite.addTest(tc);
-       }
-     
-    }
-    
-    names = new String[] {"macdesktopdark","xpfolders","sikuliinbox","finderfolders"};
+    String[] names = new String[] {"sikuliorgbanner","xpdesktop","macdesktop","xppricingapp","wherespace"};
     
 //    for (String name : names){
 //
-//       FinderTestImage testImage = new FinderTestImage(name);
+//       FinderTestImage findertestsuite = new FinderTestImage(name);
 //
-//       int n = testImage.getTestCases().size();
+//       int n = findertestsuite.getTestCases().size();
 //       for (int i=0; i < n; ++i){
 //
-//          FinderTestTarget t = testImage.getTestTarget(i);        
-//          TestCase test = new FindTopKMatchesTestCase(t);
-//          suite.addTest(test);        
+//          FinderTestTarget ts = findertestsuite.getTestTarget(i);        
+//          TestCase tc = new FindTopMatchTestCase(ts);
+//          suite.addTest(tc);
 //       }
 //     
 //    }
-//      
+    
+    names = new String[] {"macdesktopsikuli","macdesktopdark","xpfolders","sikuliinbox","finderfolders"};
+    
+    for (String name : names){
+
+       FinderTestImage testImage = new FinderTestImage(name);
+
+       int n = testImage.getTestCases().size();
+       for (int i=0; i < n; ++i){
+
+          FinderTestTarget t = testImage.getTestTarget(i);        
+          TestCase test = new FindTopKMatchesTestCase(t);
+          suite.addTest(test);        
+       }
+     
+    }
+      
       return (Test) suite;
    }
 

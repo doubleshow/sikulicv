@@ -351,7 +351,8 @@ public class TemplateFinderTest  extends TestCase {
       //FinderTestImage image = new FinderTestImage("xpfolders");
       //FinderTestImage image = new FinderTestImage("macdesktopdark");
       //FinderTestImage image = new FinderTestImage("xppricingapp");
-      FinderTestImage image = new FinderTestImage("wherespace");
+      //FinderTestImage image = new FinderTestImage("wherespace");
+      FinderTestImage image = new FinderTestImage("macdesktopsikuli");
       
       FinderTestImageEditor gt = new FinderTestImageEditor(image);
       gt.setVisible(true);
@@ -370,10 +371,11 @@ public class TemplateFinderTest  extends TestCase {
       //FinderTestImage testImage = new FinderTestImage("finderfolders");
       //FinderTestImage testImage = new FinderTestImage("macdesktopdark");
       
-      FinderTestImage testImage = new FinderTestImage("xppricingapp");
+      //FinderTestImage testImage = new FinderTestImage("xppricingapp");
+      FinderTestImage testImage = new FinderTestImage("macdesktopsikuli");
       
 //      FinderTestTarget testTarget = testImage.getTestTarget(0);
-      FinderTestTarget testTarget = testImage.getTestTarget(0);
+      FinderTestTarget testTarget = testImage.getTestTarget(5);
 //      FinderTestTarget testTarget = testImage.getTestTarget(3);
       
       //ExactColorFinder f = new ExactColorFinder();
@@ -386,7 +388,7 @@ public class TemplateFinderTest  extends TestCase {
       
       GUITargetFinder f = new GUITargetFinder();
       
-      int k = testTarget.getGroundTruthLocations().size() + 2;      
+      int k = testTarget.getGroundTruthLocations().size();      
       
       FindResult[] results = f.findTopKMatches(inputImage, targetImage, k);
       
@@ -431,7 +433,8 @@ public class TemplateFinderTest  extends TestCase {
 //      FinderTestInput input = FinderTestInput.createFromDirectory("exactcolor");
 //      FinderTestSuite input = FinderTestSuite.createFromDirectory("bubbles");
       
-      FinderTestImage suite = new FinderTestImage("xppricingapp");
+      //FinderTestImage suite = new FinderTestImage("xppricingapp");
+      FinderTestImage suite = new FinderTestImage("wherespace");
       
       
       BufferedImage screenImage = suite.getImage();
