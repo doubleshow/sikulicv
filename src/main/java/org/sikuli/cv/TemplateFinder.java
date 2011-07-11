@@ -118,12 +118,28 @@ class GUITargetFinder {
       colorIplImage.release();
       return grayIplImage;
    }
+      
+   FindResult findFirstGoodMatch(BufferedImage inputImage, BufferedImage targetImage){
+      FindResult[] results = findSimilarMatches(inputImage, targetImage, 1, 0.99);
+      if (results.length > 0){
+         return results[0];
+      }else{
+         return null;
+      }
+   }
 
-   FindResult[] findTopKSimilarMatches(BufferedImage inputImage, BufferedImage targetImage, int k, double minSimilarity){
+   FindResult[] findSimilarMatches(BufferedImage inputImage, BufferedImage targetImage, int k, double minSimilarity){
+      
+      if (inputImage.getWidth() < targetImage.getWidth() ||
+            inputImage.getHeight() < targetImage.getHeight())
+            return new FindResult[0];
+      
+      minSimilarity = Math.min(0.999, minSimilarity);
+
       IplImage inputGray = createGrayScaleIplImage(inputImage);
       IplImage targetGray = createGrayScaleIplImage(targetImage);
       
-      FindResult[] r =  findTopKSimilarMatches(inputGray, targetGray, k, minSimilarity);
+      FindResult[] r =  findSimilarMatches(inputGray, targetGray, k, minSimilarity);
     
       inputGray.release();
       targetGray.release();      
@@ -131,29 +147,40 @@ class GUITargetFinder {
    }
    
    
-   FindResult[] findTopKMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
+   FindResult[] findMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
+      
+      if (inputImage.getWidth() < targetImage.getWidth() ||
+            inputImage.getHeight() < targetImage.getHeight())
+            return new FindResult[0];
+
+      
       IplImage inputGray = createGrayScaleIplImage(inputImage);
       IplImage targetGray = createGrayScaleIplImage(targetImage);
 
-      FindResult[] r = findTopKMatches(inputGray, targetGray, k);
+      FindResult[] r = findMatches(inputGray, targetGray, k);
       
       inputGray.release();
       targetGray.release();      
       return r;
    }
    
-   FindResult findTopMatch(BufferedImage inputImage, BufferedImage targetImage){
+   FindResult findFirstMatch(BufferedImage inputImage, BufferedImage targetImage){
+      
+      if (inputImage.getWidth() < targetImage.getWidth() ||
+         inputImage.getHeight() < targetImage.getHeight())
+         return null;
+      
       IplImage inputGray = createGrayScaleIplImage(inputImage);
       IplImage targetGray = createGrayScaleIplImage(targetImage);
       
-      FindResult r = findTopMatch(inputGray, targetGray);
+      FindResult r = findFirstMatch(inputGray, targetGray);
       
       inputGray.release();
       targetGray.release();      
       return r;
    }
-
-   private FindResult[] findTopKSimilarMatches(IplImage input, IplImage target, int k, double minSimilarity){
+   
+   private FindResult[] findSimilarMatches(IplImage input, IplImage target, int k, double minSimilarity){
 
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION_FINDALLSIMILAR, 
             target.width() * 1.0 / MIM_TARGET_DIMENSION_FINDALLSIMILAR);
@@ -179,7 +206,7 @@ class GUITargetFinder {
          return filteredResults.toArray(new FindResult[0]);
    }
    
-   private FindResult[] findTopKMatches(IplImage input, IplImage target, int k){
+   private FindResult[] findMatches(IplImage input, IplImage target, int k){
       
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION_FINDALL, 
             target.width() * 1.0 / MIM_TARGET_DIMENSION_FINDALL);
@@ -198,7 +225,7 @@ class GUITargetFinder {
    }
 
 
-   private FindResult findTopMatch(IplImage input, IplImage target){
+   private FindResult findFirstMatch(IplImage input, IplImage target){
 
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION, 
          target.width() * 1.0 / MIM_TARGET_DIMENSION);

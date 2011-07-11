@@ -231,7 +231,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
 
       listView = new JList();
       listView.setCellRenderer(new MyCellRenderer());
-      listView.setListData(suite.getTestCases().toArray());
+      listView.setListData(suite.getTestTargets().toArray());
 
       listView.addListSelectionListener(new ListSelectionListener(){
 

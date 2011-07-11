@@ -20,13 +20,13 @@ class FinderTestImage {
    }
    
    public String toString(){
-      return file.getParent();
+      return file.getParentFile().getName();
    }
    
    final static String ROOT = "src/test/resources";
 
    private ArrayList<FinderTestTarget> testTargets = new  ArrayList<FinderTestTarget>();  
-   ArrayList<FinderTestTarget> getTestCases(){
+   ArrayList<FinderTestTarget> getTestTargets(){
       return testTargets;
    }
    

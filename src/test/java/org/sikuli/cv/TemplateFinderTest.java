@@ -360,7 +360,7 @@ public class TemplateFinderTest  extends TestCase {
 //      }
       
       while(true){
-         FindResult result = f.findTopMatch(inputImage, targetImage);
+         FindResult result = f.findFirstMatch(inputImage, targetImage);
       }
 
       //viewFindResults(inputImage, targetImage, results);
@@ -382,7 +382,7 @@ public class TemplateFinderTest  extends TestCase {
       
       int k = testTarget.getGroundTruthLocations().size();      
       
-      FindResult[] results = f.findTopKSimilarMatches(inputImage, targetImage, 3, 0.80);
+      FindResult[] results = f.findSimilarMatches(inputImage, targetImage, 3, 0.80);
 
 
       viewFindResults(inputImage, targetImage, results);
@@ -428,7 +428,7 @@ public class TemplateFinderTest  extends TestCase {
       
       int k = testTarget.getGroundTruthLocations().size();      
       
-      FindResult[] results = f.findTopKMatches(inputImage, targetImage, k);
+      FindResult[] results = f.findMatches(inputImage, targetImage, k);
       
       
       Set<Point> matchedGroundTruthLocationSet = new HashSet<Point>();
@@ -470,7 +470,7 @@ public class TemplateFinderTest  extends TestCase {
       FindResultViewer mv = new FindResultViewer(screenImage);
       mv.setVisible(true);
       
-      for (FinderTestTarget testTarget : suite.getTestCases()){         
+      for (FinderTestTarget testTarget : suite.getTestTargets()){         
          BufferedImage targetImage = testTarget.getImage();   
          
         logger.debug("test target: " + testTarget.file.getName());
@@ -478,7 +478,7 @@ public class TemplateFinderTest  extends TestCase {
            GUITargetFinder f = new GUITargetFinder();
            //ExactColorFinder f = new ExactColorFinder();
         
-            FindResult r = f.findTopMatch(screenImage, targetImage);
+            FindResult r = f.findFirstMatch(screenImage, targetImage);
          
             mv.addMatch(targetImage,r);
 
