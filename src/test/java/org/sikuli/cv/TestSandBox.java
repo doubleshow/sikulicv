@@ -33,8 +33,8 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
-import org.sikuli.cv.GUITargetFinder;
 import org.sikuli.cv.TemplateFinder;
+import org.sikuli.cv.BaseTemplateFinder;
 
 import com.googlecode.javacpp.Loader;
 import com.googlecode.javacv.CanvasFrame;
@@ -350,7 +350,7 @@ public class TestSandBox  extends TestCase {
       BufferedImage targetImage = testTarget.getImage();
 
       
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
       
 //      int k = testTarget.getGroundTruthLocations().size();      
 
@@ -378,7 +378,7 @@ public class TestSandBox  extends TestCase {
       BufferedImage targetImage = testTarget.getImage();
 
       
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
       
       int k = testTarget.getGroundTruthLocations().size();      
       
@@ -424,7 +424,7 @@ public class TestSandBox  extends TestCase {
       BufferedImage targetImage = testTarget.getImage();
       
       
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
       
       int k = testTarget.getGroundTruthLocations().size();      
       
@@ -475,7 +475,7 @@ public class TestSandBox  extends TestCase {
          
         logger.debug("test target: " + testTarget.file.getName());
          
-           GUITargetFinder f = new GUITargetFinder();
+           TemplateFinder f = new TemplateFinder();
            //ExactColorFinder f = new ExactColorFinder();
         
             FindResult r = f.findFirstMatch(screenImage, targetImage);
@@ -512,7 +512,7 @@ public class TestSandBox  extends TestCase {
       int th = 100;
       for (int ty=0; ty < screen.getHeight()-2*dy - th ; ty += dy){
          BufferedImage target = crop(screen, new Rectangle(20,ty,tw,th));
-         FindResult r = TemplateFinder.findGroundTruthTopMatch(screen, target, 0.95);
+         FindResult r = BaseTemplateFinder.findGroundTruthTopMatch(screen, target, 0.95);
          Logger.getRootLogger().info(r);
       }
 

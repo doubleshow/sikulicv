@@ -136,7 +136,7 @@ class FinderTestTarget {
          logger.debug("compute ground truth");
          BufferedImage inputImage = ImageIO.read(testImage.file);
          BufferedImage targetImage = ImageIO.read(this.file);      
-         FindResult r = TemplateFinder.findGroundTruthTopMatch(inputImage, targetImage, 0.95);
+         FindResult r = BaseTemplateFinder.findGroundTruthTopMatch(inputImage, targetImage, 0.95);
 
          groundTruth = r;
          encodeGroundTruthIntoFilename();

@@ -14,87 +14,7 @@ import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_imgproc;
 
 
-
-
 public class TemplateFinder {
-   
-   
-//   static ArrayList<FindResult> findTopKMatches(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
-//      
-//      return null;
-//   }
-//
-//   static FindResult findTopMatchFast(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
-//      FindResult r = new FindResult();
-//      r.x = 10;
-//      r.y = 10;
-//      r.width = 10;
-//      r.height = 10;
-//      return r;
-//   }
-
-      
-   static IplImage computeTemplateMatchResultMatrix(IplImage input, IplImage target){
-      
-      int iwidth,iheight;
-      if (input.roi() != null){
-         iwidth = input.roi().width() - target.width() + 1;
-         iheight = input.roi().height() - target.height() + 1;      
-      }else{
-         iwidth = input.width() - target.width() + 1;
-         iheight = input.height() - target.height() + 1;
-      }
-      
-      IplImage map = IplImage.create(cvSize(iwidth,iheight), 32, 1);      
-      opencv_imgproc.cvMatchTemplate(input, target, map, CV_TM_CCORR_NORMED);
-      return map;
-   }
-   
-   
-   static FindResult findGroundTruthTopMatch(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
-      
-      IplImage inputColor = IplImage.createFrom(screenImage);            
-      IplImage targetColor = IplImage.createFrom(targetImage);
-      
-      IplImage inputGray = IplImage.create(cvGetSize(inputColor), 8, 1);
-      IplImage targetGray = IplImage.create(cvGetSize(targetColor), 8, 1);
-      cvCvtColor(inputColor, inputGray, CV_RGB2GRAY);
-      cvCvtColor(targetColor, targetGray, CV_RGB2GRAY);
-      
-      IplImage map = computeTemplateMatchResultMatrix(inputGray, targetGray);
-      
-      double min[] = new double[1];
-      double max[] = new double[1];
-      CvPoint minPoint = new CvPoint(2);
-      CvPoint maxPoint = new CvPoint(2);
-      
-      opencv_core.cvMinMaxLoc(map, min, max, minPoint, maxPoint, null);
-      
-      cvReleaseImage(map);
-      cvReleaseImage(inputColor);
-      cvReleaseImage(targetColor);
-      cvReleaseImage(inputGray);
-      cvReleaseImage(targetColor);
-      
-//      if (max[0] < min_similarity){
-//         return null;
-//         
-//      }else{
-      
-         FindResult result = new FindResult();
-         result.x = maxPoint.x();
-         result.y = maxPoint.y();
-         result.width = targetImage.getWidth();
-         result.height = targetImage.getHeight();
-         result.score = max[0];
-
-         return result;
-    //  }
-   }
-   
-}
-
-class GUITargetFinder {
    
    static final float MIM_TARGET_DIMENSION  = 6.0f;
    static final float MIM_TARGET_DIMENSION_FINDALL  = 24.0f;
@@ -119,7 +39,7 @@ class GUITargetFinder {
       return grayIplImage;
    }
       
-   FindResult findFirstGoodMatch(BufferedImage inputImage, BufferedImage targetImage){
+   public FindResult findFirstGoodMatch(BufferedImage inputImage, BufferedImage targetImage){
       FindResult[] results = findSimilarMatches(inputImage, targetImage, 1, 0.99);
       if (results.length > 0){
          return results[0];
@@ -128,7 +48,7 @@ class GUITargetFinder {
       }
    }
 
-   FindResult[] findSimilarMatches(BufferedImage inputImage, BufferedImage targetImage, int k, double minSimilarity){
+   public FindResult[] findSimilarMatches(BufferedImage inputImage, BufferedImage targetImage, int k, double minSimilarity){
       
       if (inputImage.getWidth() < targetImage.getWidth() ||
             inputImage.getHeight() < targetImage.getHeight())
@@ -147,7 +67,7 @@ class GUITargetFinder {
    }
    
    
-   FindResult[] findMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
+   public FindResult[] findMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
       
       if (inputImage.getWidth() < targetImage.getWidth() ||
             inputImage.getHeight() < targetImage.getHeight())
@@ -164,7 +84,7 @@ class GUITargetFinder {
       return r;
    }
    
-   FindResult findFirstMatch(BufferedImage inputImage, BufferedImage targetImage){
+   public   FindResult findFirstMatch(BufferedImage inputImage, BufferedImage targetImage){
       
       if (inputImage.getWidth() < targetImage.getWidth() ||
          inputImage.getHeight() < targetImage.getHeight())
@@ -249,7 +169,87 @@ class GUITargetFinder {
    }
 }
 
-class ExactColorFinder extends TemplateFinder {
+class BaseTemplateFinder {
+   
+   
+//   static ArrayList<FindResult> findTopKMatches(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
+//      
+//      return null;
+//   }
+//
+//   static FindResult findTopMatchFast(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
+//      FindResult r = new FindResult();
+//      r.x = 10;
+//      r.y = 10;
+//      r.width = 10;
+//      r.height = 10;
+//      return r;
+//   }
+
+      
+   static IplImage computeTemplateMatchResultMatrix(IplImage input, IplImage target){
+      
+      int iwidth,iheight;
+      if (input.roi() != null){
+         iwidth = input.roi().width() - target.width() + 1;
+         iheight = input.roi().height() - target.height() + 1;      
+      }else{
+         iwidth = input.width() - target.width() + 1;
+         iheight = input.height() - target.height() + 1;
+      }
+      
+      IplImage map = IplImage.create(cvSize(iwidth,iheight), 32, 1);      
+      opencv_imgproc.cvMatchTemplate(input, target, map, CV_TM_CCORR_NORMED);
+      return map;
+   }
+   
+   
+   static FindResult findGroundTruthTopMatch(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
+      
+      IplImage inputColor = IplImage.createFrom(screenImage);            
+      IplImage targetColor = IplImage.createFrom(targetImage);
+      
+      IplImage inputGray = IplImage.create(cvGetSize(inputColor), 8, 1);
+      IplImage targetGray = IplImage.create(cvGetSize(targetColor), 8, 1);
+      cvCvtColor(inputColor, inputGray, CV_RGB2GRAY);
+      cvCvtColor(targetColor, targetGray, CV_RGB2GRAY);
+      
+      IplImage map = computeTemplateMatchResultMatrix(inputGray, targetGray);
+      
+      double min[] = new double[1];
+      double max[] = new double[1];
+      CvPoint minPoint = new CvPoint(2);
+      CvPoint maxPoint = new CvPoint(2);
+      
+      opencv_core.cvMinMaxLoc(map, min, max, minPoint, maxPoint, null);
+      
+      cvReleaseImage(map);
+      cvReleaseImage(inputColor);
+      cvReleaseImage(targetColor);
+      cvReleaseImage(inputGray);
+      cvReleaseImage(targetColor);
+      
+//      if (max[0] < min_similarity){
+//         return null;
+//         
+//      }else{
+      
+         FindResult result = new FindResult();
+         result.x = maxPoint.x();
+         result.y = maxPoint.y();
+         result.width = targetImage.getWidth();
+         result.height = targetImage.getHeight();
+         result.score = max[0];
+
+         return result;
+    //  }
+   }
+   
+}
+
+
+
+class ExactColorFinder extends BaseTemplateFinder {
    FindResult findTopMatch(BufferedImage inputImage, BufferedImage targetImage){
       
       IplImage inputColor = IplImage.createFrom(inputImage);            
@@ -320,7 +320,7 @@ class ExactColorFinder extends TemplateFinder {
    
 }
 
-class DownsampleTemplateFinder extends TemplateFinder {
+class DownsampleTemplateFinder extends BaseTemplateFinder {
    
    static Logger logger = Logger.getLogger(DownsampleTemplateFinder.class);
    

@@ -14,7 +14,7 @@ import javax.imageio.ImageIO;
 
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
-import org.sikuli.cv.GUITargetFinder;
+import org.sikuli.cv.TemplateFinder;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -54,7 +54,7 @@ public class FinderTestSuite extends TestCase {
          BufferedImage smallInput = ImageIO.read(new File(root,"smallInput.png"));
          BufferedImage largeTarget = ImageIO.read(new File(root, "largeTarget.png"));
          
-         GUITargetFinder f = new GUITargetFinder();
+         TemplateFinder f = new TemplateFinder();
          FindResult r = f.findFirstMatch(smallInput, largeTarget);
          assertThat(r, equalTo(null));
          
@@ -72,7 +72,7 @@ public class FinderTestSuite extends TestCase {
       public void testInputAndTargetAreTheSame() throws IOException{         
          BufferedImage smallInput = ImageIO.read(new File(root,"smallInput.png"));
          
-         GUITargetFinder f = new GUITargetFinder();
+         TemplateFinder f = new TemplateFinder();
          FindResult r = f.findFirstMatch(smallInput, smallInput);
          assertThat(r.x, equalTo(0));
          assertThat(r.y, equalTo(0));
@@ -84,7 +84,7 @@ public class FinderTestSuite extends TestCase {
          BufferedImage input = ImageIO.read(new File(root,"screen.png"));
          BufferedImage target = ImageIO.read(new File(root,"target.png"));
          
-         GUITargetFinder f = new GUITargetFinder();
+         TemplateFinder f = new TemplateFinder();
          FindResult[] rs = f.findSimilarMatches(input, target, 10, -1.0);
          assertThat(rs.length, equalTo(10));
       }
@@ -93,7 +93,7 @@ public class FinderTestSuite extends TestCase {
          BufferedImage input = ImageIO.read(new File(root,"screen.png"));
          BufferedImage target = ImageIO.read(new File(root,"target.png"));
          
-         GUITargetFinder f = new GUITargetFinder();
+         TemplateFinder f = new TemplateFinder();
          FindResult[] rs = f.findSimilarMatches(input, target, 10, 1.5);
          assertThat(rs.length, equalTo(1));
 
@@ -106,7 +106,7 @@ public class FinderTestSuite extends TestCase {
          BufferedImage input = ImageIO.read(new File(root,"screen.png"));
          BufferedImage target1 = ImageIO.read(new File(root,"target1.png"));
          
-         GUITargetFinder f = new GUITargetFinder();
+         TemplateFinder f = new TemplateFinder();
          FindResult[] rs = f.findSimilarMatches(input, target1, 1000, 0.5);
          assertThat(rs.length, equalTo(1000));
 
@@ -160,7 +160,7 @@ class FindFirstMatchTestCase extends TestCase {
       BufferedImage screenImage = target.getScreenImage();
       BufferedImage targetImage = target.getImage();   
 
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
 
       FindResult r = f.findFirstMatch(screenImage, targetImage);
 
@@ -221,7 +221,7 @@ class FindMatchesTestCase extends TestCase {
          e.printStackTrace();
       }
 
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
 
       int k = target.getGroundTruthLocations().size();      
 
@@ -311,7 +311,7 @@ class FindGoodMatchTestCase extends TestCase {
    
    @Override   
    public void runTest() {
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
       try {
          FindResult r = f.findFirstGoodMatch(testImage.getImage(), target.getImage());
          if (!expectedExistence){
@@ -373,7 +373,7 @@ class FindSimilarMatchesTestCase extends TestCase {
          e.printStackTrace();
       }
 
-      GUITargetFinder f = new GUITargetFinder();
+      TemplateFinder f = new TemplateFinder();
 
       int k = target.getGroundTruthLocations().size();      
       
