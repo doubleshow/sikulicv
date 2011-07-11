@@ -13,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import org.sikuli.cv.FindResult;
 
 class FindResultViewer extends InputImageViewer{
    

@@ -28,14 +28,17 @@ import javax.swing.ListCellRenderer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.junit.Test;
+import org.junit.Test;
+
 class FinderTestImageEditor extends JFrame implements KeyListener {
 
 
    static class FinderTestTargetView extends JScrollPane implements MouseListener {
-      
-      
+
+
       FinderTestTarget testCase;
-      
+
       JPanel matchesPanel;
 
       FinderTestTargetView(FinderTestTarget testcase) throws IOException{
@@ -47,7 +50,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
          JLabel label = new JLabel(imageIcon);
          label.setSize(label.getPreferredSize());
          add(label); 
-         
+
          matchesPanel = new JPanel();
          matchesPanel.setOpaque(false);
          matchesPanel.setSize(label.getPreferredSize());         
@@ -57,7 +60,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
          setPreferredSize(label.getPreferredSize());
 
          addMouseListener(this);
-         
+
          setTestCase(testcase);
 
 
@@ -75,7 +78,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
             g2d.drawRect(1,1,r.width-3,r.height-3);
          }
       }
-      
+
       static class PointMatchView extends JComponent{
 
          @Override
@@ -90,14 +93,14 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
          }
       }
 
-      
-      
+
+
 
       public void setTestCase(FinderTestTarget testcase) {
          testCase = testcase;
-         
+
          matchesPanel.removeAll();
-         
+
          for (Point p : testcase.getGroundTruthLocations()){         
             PointMatchView tv = new PointMatchView();
             tv.setLocation(p.x-10,p.y-10);
@@ -113,7 +116,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
       @Override
       public void mouseClicked(MouseEvent arg0) {
          // TODO Auto-generated method stub
-         
+
       }
 
 
@@ -122,7 +125,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
       @Override
       public void mouseEntered(MouseEvent arg0) {
          // TODO Auto-generated method stub
-         
+
       }
 
 
@@ -147,7 +150,7 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
       @Override
       public void mouseReleased(MouseEvent arg0) {
          // TODO Auto-generated method stub
-         
+
       }
 
 
@@ -158,17 +161,17 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
       }
 
    }
-   
+
    class MyCellRenderer extends JLabel implements ListCellRenderer {
       public MyCellRenderer() {
-          setOpaque(true);
+         setOpaque(true);
       }
 
       public Component getListCellRendererComponent(JList list,
-                                                    Object value,
-                                                    int index,
-                                                    boolean isSelected,
-                                                    boolean cellHasFocus) {
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus) {
 
          FinderTestTarget testCase = (FinderTestTarget) value;
          ImageIcon imageIcon;
@@ -184,52 +187,52 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
-//          //setText(value.toString());
-//
-//          Color background;
-//          Color foreground;
-//
-//          // check if this cell represents the current DnD drop location
-//          JList.DropLocation dropLocation = list.getDropLocation();
-//          if (dropLocation != null
-//                  && !dropLocation.isInsert()
-//                  && dropLocation.getIndex() == index) {
-//
-//              background = Color.BLUE;
-//              foreground = Color.WHITE;
-//
-//          // check if this cell is selected
-//          } else if (isSelected) {
-//              background = Color.RED;
-//              foreground = Color.WHITE;
-//
-//          // unselected, and not the DnD drop location
-//          } else {
-//              background = Color.WHITE;
-//              foreground = Color.BLACK;
-//          };
-//
-//          setBackground(background);
-//          setForeground(foreground);
+         //          //setText(value.toString());
+         //
+         //          Color background;
+         //          Color foreground;
+         //
+         //          // check if this cell represents the current DnD drop location
+         //          JList.DropLocation dropLocation = list.getDropLocation();
+         //          if (dropLocation != null
+         //                  && !dropLocation.isInsert()
+         //                  && dropLocation.getIndex() == index) {
+         //
+         //              background = Color.BLUE;
+         //              foreground = Color.WHITE;
+         //
+         //          // check if this cell is selected
+         //          } else if (isSelected) {
+         //              background = Color.RED;
+         //              foreground = Color.WHITE;
+         //
+         //          // unselected, and not the DnD drop location
+         //          } else {
+         //              background = Color.WHITE;
+         //              foreground = Color.BLACK;
+         //          };
+         //
+         //          setBackground(background);
+         //          setForeground(foreground);
 
-          return this;
+         return this;
       }
-  }
+   }
 
    FinderTestTargetView testCaseView;
    JList listView;
    FinderTestImage testSuite;
    FinderTestImageEditor(FinderTestImage suite) throws IOException{
-      
+
       testSuite = suite;
       FinderTestTarget testcase = suite.getTestTarget(0);
       testCaseView = new FinderTestTargetView(testcase);
-      
+
 
       listView = new JList();
       listView.setCellRenderer(new MyCellRenderer());
       listView.setListData(suite.getTestCases().toArray());
-      
+
       listView.addListSelectionListener(new ListSelectionListener(){
 
          @Override
@@ -237,24 +240,24 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
             int index = listView.getSelectedIndex();
             FinderTestTarget testcase = testSuite.getTestTarget(index); 
             testCaseView.setTestCase(testcase);
-            
+
          }
-         
+
       });
       //list.setSelectedIndex(1);
       listView.setSelectedIndex(0);
-      
+
       JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listView, testCaseView);
 
 
       setLayout(new BoxLayout(getContentPane(),BoxLayout.X_AXIS));
       add(splitPane);
       pack();//setSize(800,600);
-      
+
       testcase = suite.getTestTarget(0); 
       testCaseView.setTestCase(testcase);
-      
-      
+
+
       setFocusable(true);
       addKeyListener(this);
       listView.addKeyListener(this);
@@ -271,12 +274,12 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
       }
    }
 
-   
+
    FinderTestTarget getCurrentTestCase(){
       int index = listView.getSelectedIndex();
       return testSuite.getTestTarget(index);
    }
-   
+
 
    @Override
    public void keyPressed(KeyEvent e) {
@@ -290,20 +293,43 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
          testCaseView.refresh();
          repaint();
       }
-      
+
    }
 
    @Override
    public void keyReleased(KeyEvent arg0) {
       // TODO Auto-generated method stub
-      
+
    }
 
    @Override
    public void keyTyped(KeyEvent arg0) {
       // TODO Auto-generated method stub
-      
+
    }
+
+
+
+
+   static public class FinderTestImageEditorTestCase {
+
+      @Test
+      public void labelImage() throws IOException, InterruptedException {
+
+         //String screenImageName = "fuzzydesktop";
+         String screenImageName = "fuzzyfarmville";
+
+         FinderTestImage image = new FinderTestImage(screenImageName);      
+         FinderTestImageEditor gt = new FinderTestImageEditor(image);
+         gt.setVisible(true);
+
+         Object lock = new Object();
+         synchronized (lock){
+            lock.wait();
+         }
+      }
+   }
+
 
    //   void addMatch(BufferedImage target, FindResult r){
    //      MatchView v = new MatchView();
@@ -328,3 +354,6 @@ class FinderTestImageEditor extends JFrame implements KeyListener {
    //      repaint();
    //   }
 }
+
+
+

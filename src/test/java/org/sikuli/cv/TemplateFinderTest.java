@@ -33,7 +33,6 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
-import org.sikuli.cv.FindResult;
 import org.sikuli.cv.GUITargetFinder;
 import org.sikuli.cv.TemplateFinder;
 
@@ -338,32 +337,73 @@ public class TemplateFinderTest  extends TestCase {
 
    }
    
+   
    @Test
-   public void testGTLabler() throws IOException, InterruptedException {
-//    FinderTestInput input = FinderTestInput.createFromDirectory("exactcolor");
-//      FinderTestSuite input = FinderTestSuite.createFromDirectory("bubbles");      
-//      FinderTestSuite input = FinderTestSuite.createFromDirectory("sikuliorgbanner");
-      //FinderTestImage input = FinderTestImage.createFromDirectory("macdesktop");
-      //FinderTestSuite input = FinderTestSuite.createFromDirectory("xpdesktop")
+   public void testMemoryConsumption() throws IOException, InterruptedException {
       
-      //FinderTestImage image = new FinderTestImage("sikuliinbox");
-      //FinderTestImage image = new FinderTestImage("finderFolders");
-      //FinderTestImage image = new FinderTestImage("xpfolders");
-      //FinderTestImage image = new FinderTestImage("macdesktopdark");
-      //FinderTestImage image = new FinderTestImage("xppricingapp");
-      //FinderTestImage image = new FinderTestImage("wherespace");
-      FinderTestImage image = new FinderTestImage("macdesktopsikuli");
-      
-      FinderTestImageEditor gt = new FinderTestImageEditor(image);
-      gt.setVisible(true);
+      //FinderTestImage testImage = new FinderTestImage("fuzzydesktop");
+      FinderTestImage testImage = new FinderTestImage("fuzzyfarmville");
+      FinderTestTarget testTarget = testImage.getTestTarget(2);
       
       
+      BufferedImage inputImage = testImage.getImage();
+      BufferedImage targetImage = testTarget.getImage();
+
+      
+      GUITargetFinder f = new GUITargetFinder();
+      
+//      int k = testTarget.getGroundTruthLocations().size();      
+
+//      for (int i=0;i<1000;++i){
+//         //FindResult[] results = f.findTopKSimilarMatches(inputImage, targetImage, 3, 0.80);        
+//         FindResult result = f.findTopMatch(inputImage, targetImage);
+//      }
+      
+      while(true){
+         FindResult result = f.findTopMatch(inputImage, targetImage);
+      }
+
+      //viewFindResults(inputImage, targetImage, results);
+   }
+   
+   @Test
+   public void testFindFuzzy() throws IOException, InterruptedException {
+      
+      //FinderTestImage testImage = new FinderTestImage("fuzzydesktop");
+      FinderTestImage testImage = new FinderTestImage("fuzzyfarmville");
+      FinderTestTarget testTarget = testImage.getTestTarget(2);
+      
+      
+      BufferedImage inputImage = testImage.getImage();
+      BufferedImage targetImage = testTarget.getImage();
+
+      
+      GUITargetFinder f = new GUITargetFinder();
+      
+      int k = testTarget.getGroundTruthLocations().size();      
+      
+      FindResult[] results = f.findTopKSimilarMatches(inputImage, targetImage, 3, 0.80);
+
+
+      viewFindResults(inputImage, targetImage, results);
+   }
+//   
+//   static void viewFindResults(BufferedImage inputImage, )
+
+   private void viewFindResults(BufferedImage inputImage,
+         BufferedImage targetImage, FindResult[] results)
+         throws InterruptedException {
+      
+      FindResultViewer mv = new FindResultViewer(inputImage);
+      mv.setVisible(true);
+      for (FindResult r : results){
+         mv.addMatch(targetImage,r);
+      }
       Object lock = new Object();
       synchronized (lock){
          lock.wait();
       }
    }
-   
    
    @Test
    public void testFindAll() throws IOException, InterruptedException {
@@ -383,8 +423,6 @@ public class TemplateFinderTest  extends TestCase {
       BufferedImage inputImage = testImage.getImage();
       BufferedImage targetImage = testTarget.getImage();
       
-      FindResultViewer mv = new FindResultViewer(inputImage);
-      mv.setVisible(true);
       
       GUITargetFinder f = new GUITargetFinder();
       
@@ -411,17 +449,7 @@ public class TemplateFinderTest  extends TestCase {
       
     //  assertEquals(k, matchedGroundTruthLocationSet.size());
             
-      for (FindResult r : results){
-         mv.addMatch(targetImage,r);
-      }
-      
-      
-      
-
-      Object lock = new Object();
-      synchronized (lock){
-         lock.wait();
-      }
+      viewFindResults(inputImage, targetImage, results);
    }
    
    @Test

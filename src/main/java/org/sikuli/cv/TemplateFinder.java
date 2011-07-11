@@ -1,6 +1,5 @@
 package org.sikuli.cv;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -20,19 +19,19 @@ import com.googlecode.javacv.cpp.opencv_imgproc;
 public class TemplateFinder {
    
    
-   static ArrayList<FindResult> findTopKMatches(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
-      
-      return null;
-   }
-
-   static FindResult findTopMatchFast(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
-      FindResult r = new FindResult();
-      r.x = 10;
-      r.y = 10;
-      r.width = 10;
-      r.height = 10;
-      return r;
-   }
+//   static ArrayList<FindResult> findTopKMatches(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
+//      
+//      return null;
+//   }
+//
+//   static FindResult findTopMatchFast(BufferedImage screenImage, BufferedImage targetImage, double min_similarity){
+//      FindResult r = new FindResult();
+//      r.x = 10;
+//      r.y = 10;
+//      r.width = 10;
+//      r.height = 10;
+//      return r;
+//   }
 
       
    static IplImage computeTemplateMatchResultMatrix(IplImage input, IplImage target){
@@ -47,9 +46,6 @@ public class TemplateFinder {
       }
       
       IplImage map = IplImage.create(cvSize(iwidth,iheight), 32, 1);      
-      //logger.info(in)
-      //System.out.println("input:" + input.depth() + "_" + CV_8UC2);
-      //System.out.println("target:" + target.depth());
       opencv_imgproc.cvMatchTemplate(input, target, map, CV_TM_CCORR_NORMED);
       return map;
    }
@@ -102,6 +98,9 @@ class GUITargetFinder {
    
    static final float MIM_TARGET_DIMENSION  = 6.0f;
    static final float MIM_TARGET_DIMENSION_FINDALL  = 24.0f;
+   static final float MIM_TARGET_DIMENSION_FINDALLSIMILAR  = 32.0f;
+   
+   
    static final float REMATCH_THRESHOLD  = 0.995f;
    
    static BufferedImage deepCopy(BufferedImage bi) {
@@ -110,42 +109,77 @@ class GUITargetFinder {
       WritableRaster raster = bi.copyData(null);
       return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
      }
-
    
    
-   FindResult[] findTopKMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
-      IplImage inputColor = IplImage.createFrom(inputImage);            
-      IplImage targetColor = IplImage.createFrom(targetImage);
-      
-      IplImage inputGray = IplImage.create(cvGetSize(inputColor), 8, 1);
-      IplImage targetGray = IplImage.create(cvGetSize(targetColor), 8, 1);
-      cvCvtColor(inputColor, inputGray, CV_RGB2GRAY);
-      cvCvtColor(targetColor, targetGray, CV_RGB2GRAY);
-      
-      return findTopKMatches(inputGray, targetGray, k);
+   private IplImage createGrayScaleIplImage(BufferedImage colorImage){
+      IplImage colorIplImage = IplImage.createFrom(colorImage);            
+      IplImage grayIplImage = IplImage.create(cvGetSize(colorIplImage), 8, 1);
+      cvCvtColor(colorIplImage, grayIplImage, CV_RGB2GRAY);
+      colorIplImage.release();
+      return grayIplImage;
    }
-   
-   FindResult findTopMatch(BufferedImage inputImage, BufferedImage targetImage){
-      //BufferedImage temp = deepCopy(inputImage);
-      IplImage inputColor = IplImage.createFrom(inputImage);            
-      IplImage targetColor = IplImage.createFrom(targetImage);
+
+   FindResult[] findTopKSimilarMatches(BufferedImage inputImage, BufferedImage targetImage, int k, double minSimilarity){
+      IplImage inputGray = createGrayScaleIplImage(inputImage);
+      IplImage targetGray = createGrayScaleIplImage(targetImage);
       
-      IplImage inputGray = IplImage.create(cvGetSize(inputColor), 8, 1);
-      IplImage targetGray = IplImage.create(cvGetSize(targetColor), 8, 1);
-      cvCvtColor(inputColor, inputGray, CV_RGB2GRAY);
-      cvCvtColor(targetColor, targetGray, CV_RGB2GRAY);
-      
-      FindResult r = findTopMatch(inputGray, targetGray);
-      
-//      cvReleaseImage(inputColor);
-//      cvReleaseImage(targetColor);
-//      cvReleaseImage(inputGray);
-//      cvReleaseImage(targetGray);
-      
+      FindResult[] r =  findTopKSimilarMatches(inputGray, targetGray, k, minSimilarity);
+    
+      inputGray.release();
+      targetGray.release();      
       return r;
    }
    
-   FindResult[] findTopKMatches(IplImage input, IplImage target, int k){
+   
+   FindResult[] findTopKMatches(BufferedImage inputImage, BufferedImage targetImage, int k){
+      IplImage inputGray = createGrayScaleIplImage(inputImage);
+      IplImage targetGray = createGrayScaleIplImage(targetImage);
+
+      FindResult[] r = findTopKMatches(inputGray, targetGray, k);
+      
+      inputGray.release();
+      targetGray.release();      
+      return r;
+   }
+   
+   FindResult findTopMatch(BufferedImage inputImage, BufferedImage targetImage){
+      IplImage inputGray = createGrayScaleIplImage(inputImage);
+      IplImage targetGray = createGrayScaleIplImage(targetImage);
+      
+      FindResult r = findTopMatch(inputGray, targetGray);
+      
+      inputGray.release();
+      targetGray.release();      
+      return r;
+   }
+
+   private FindResult[] findTopKSimilarMatches(IplImage input, IplImage target, int k, double minSimilarity){
+
+      double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION_FINDALLSIMILAR, 
+            target.width() * 1.0 / MIM_TARGET_DIMENSION_FINDALLSIMILAR);
+         
+         DownsampleTemplateFinder tm = new DownsampleTemplateFinder();
+         
+         //FindResult[] topResults = tm.findTopKMatches(input, target, factor, k);
+         FindResult[] topResults = tm.findTopKMatches(input, target, factor, k);
+//         FindResult top = topResults[0];
+//         
+//         if (top.score < REMATCH_THRESHOLD){
+//            topResults = tm.findTopKMatches(input, target, factor*0.25, k);
+//         }
+         
+         
+         ArrayList<FindResult> filteredResults = new ArrayList<FindResult>();
+         for (FindResult r : topResults){
+            if (r.score >= minSimilarity){
+               filteredResults.add(r);
+            }
+         }
+         
+         return filteredResults.toArray(new FindResult[0]);
+   }
+   
+   private FindResult[] findTopKMatches(IplImage input, IplImage target, int k){
       
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION_FINDALL, 
             target.width() * 1.0 / MIM_TARGET_DIMENSION_FINDALL);
@@ -154,11 +188,17 @@ class GUITargetFinder {
          
          FindResult[] topResults = tm.findTopKMatches(input, target, factor, k);
    
+         FindResult top = topResults[0];
+         
+         if (top.score < REMATCH_THRESHOLD){
+            topResults = tm.findTopKMatches(input, target, factor*0.75, k);
+         }
+         
          return topResults;
    }
 
 
-   FindResult findTopMatch(IplImage input, IplImage target){
+   private FindResult findTopMatch(IplImage input, IplImage target){
 
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION, 
          target.width() * 1.0 / MIM_TARGET_DIMENSION);
@@ -178,7 +218,6 @@ class GUITargetFinder {
       if (top.score < REMATCH_THRESHOLD){
          top = tm.findTopMatch(input, target, factor/4);
       }
-
       return top;
    }
 }
@@ -188,6 +227,7 @@ class ExactColorFinder extends TemplateFinder {
       
       IplImage inputColor = IplImage.createFrom(inputImage);            
       IplImage targetColor = IplImage.createFrom(targetImage);
+      //inputColor.
       
       System.out.println("channels = " + inputColor.nChannels());
       System.out.println("channels = " + targetColor.nChannels());
@@ -257,7 +297,7 @@ class DownsampleTemplateFinder extends TemplateFinder {
    
    static Logger logger = Logger.getLogger(DownsampleTemplateFinder.class);
    
-   CvSize getSmallerSize(IplImage image, double ratio){
+   private CvSize getSmallerSize(IplImage image, double ratio){
       return cvSize((int)(1.0*image.width()/ratio), (int)(1.0*image.height()/ratio));      
    }
    
@@ -273,23 +313,16 @@ class DownsampleTemplateFinder extends TemplateFinder {
       }      
    }
    
-   
-
-   ArrayList<FindResult> candidateResults = new ArrayList<FindResult>();
-
-   
-   FindResult[] findTopKMatches(IplImage input, IplImage target, double factor, int k){
-      
+   private ArrayList<FindResult> findCandidatesAtCoarseLevel(IplImage input, IplImage target, double factor, int n){
       IplImage coarseInput = createSmallerImage(input, factor);
       IplImage coarseTarget = createSmallerImage(target, factor);
       IplImage coarseMatchResultMatrix = computeTemplateMatchResultMatrix(coarseInput, coarseTarget);
 //
-      logger.debug("factor=" + factor);
+      //logger.debug("factor=" + factor);
       MatchFetcher coarseMatcher = new MatchFetcher(coarseMatchResultMatrix, coarseTarget);
 
-      candidateResults.clear();
-      
-      for (int i=0;i<10+k;++i){
+      ArrayList<FindResult> candidateResults = new ArrayList<FindResult>();      
+      for (int i=0;i<n;++i){
          FindResult m = coarseMatcher.fetchNextMatch();
          //logger.debug("coarse match: " + m);
          
@@ -315,7 +348,7 @@ class DownsampleTemplateFinder extends TemplateFinder {
          //logger.debug("fine match: " + candiateMatch); 
          candidateResults.add(candiateMatch);         
 
-//         cvReleaseImage(fineMatchResultMatrix);
+         fineMatchResultMatrix.release();
       }
       
       Collections.sort(candidateResults, Collections.reverseOrder());
@@ -323,127 +356,34 @@ class DownsampleTemplateFinder extends TemplateFinder {
 //         logger.debug("score :" + c.score);
 //      }
       
+      coarseMatchResultMatrix.release();
+      coarseInput.release();
+      coarseTarget.release();
+      
+      Collections.sort(candidateResults, Collections.reverseOrder());
+      
+      return candidateResults;
+   }
+
+   
+   FindResult[] findTopKMatches(IplImage input, IplImage target, double factor, int k){
+      ArrayList<FindResult> candidateResults = findCandidatesAtCoarseLevel(input, target, factor, 10+k);      
       FindResult[] topKCandidates = new FindResult[k];
       for (int i=0; i < k; ++i){         
          topKCandidates[i] = candidateResults.get(i);         
       }
-//      cvReleaseImage(coarseMatchResultMatrix);
-//      cvReleaseImage(coarseInput);
-//      cvReleaseImage(coarseTarget);
-
       return topKCandidates;
    }
    
    
    // input must be grayscale images
    FindResult findTopMatch(IplImage input, IplImage target, double factor){
-      
-      IplImage coarseInput = createSmallerImage(input, factor);
-      IplImage coarseTarget = createSmallerImage(target, factor);
-      IplImage coarseMatchResultMatrix = computeTemplateMatchResultMatrix(coarseInput, coarseTarget);
-//
-      logger.debug("factor=" + factor);
-      MatchFetcher coarseMatcher = new MatchFetcher(coarseMatchResultMatrix, coarseTarget);
-
-      candidateResults.clear();
-      
-      for (int i=0;i<10;++i){
-         FindResult m = coarseMatcher.fetchNextMatch();
-         //logger.debug("coarse match: " + m);
-         
-         int x = (int) (1.0*m.x*factor);
-         int y = (int) (1.0*m.y*factor);
-         
-         // compute the parameter to define the neighborhood rectangle
-         int d = (int) (factor + 1);
-         int x0 = Math.max(x-d,0);
-         int y0 = Math.max(y-d,0);
-         int x1 = Math.min(x+d+target.width(), input.width());
-         int y1 = Math.min(y+d+target.height(), input.height());
-         CvRect roi = cvRect(x0,y0,x1-x0,y1-y0);
-         
-         cvSetImageROI(input, roi);         
-         IplImage fineMatchResultMatrix = computeTemplateMatchResultMatrix(input, target);
-         cvResetImageROI(input);         
-
-         MatchFetcher fineMatcher = new MatchFetcher(fineMatchResultMatrix, target);
-         FindResult candiateMatch = fineMatcher.fetchNextMatch();
-         candiateMatch.x += roi.x();
-         candiateMatch.y += roi.y();
-         //logger.debug("fine match: " + candiateMatch); 
-         candidateResults.add(candiateMatch);         
-
-//         cvReleaseImage(fineMatchResultMatrix);
-      }
-      
-      Collections.sort(candidateResults, Collections.reverseOrder());
-//      for (FindResult c : candidateResults){
-//         logger.debug("score :" + c.score);
-//      }
-      
-//      cvReleaseImage(coarseMatchResultMatrix);
-//      cvReleaseImage(coarseInput);
-//      cvReleaseImage(coarseTarget);
-
+      ArrayList<FindResult> candidateResults;
+      candidateResults = findCandidatesAtCoarseLevel(input, target, factor, 10);
       return candidateResults.get(0);
-
    }
-   
-      
-   FindResult findTopMatch(BufferedImage inputImage, BufferedImage targetImage, double factor){
-      
-      
-      IplImage inputColor = IplImage.createFrom(inputImage);            
-      IplImage targetColor = IplImage.createFrom(targetImage);
 
-      
-      IplImage inputGray = IplImage.create(cvGetSize(inputColor), 8, 1);
-      IplImage targetGray = IplImage.create(cvGetSize(targetColor), 8, 1);
-      cvCvtColor(inputColor, inputGray, CV_RGB2GRAY);
-      cvCvtColor(targetColor, targetGray, CV_RGB2GRAY);
-      
-      FindResult r = findTopMatch(inputGray, targetGray, factor);
-      
-//      cvReleaseImage(inputColor);
-//      cvReleaseImage(targetColor);
-//      cvReleaseImage(inputGray);
-//      cvReleaseImage(targetGray);
-      
-      return r;
-   }
-   
-   
-   
 }
-
-class FindResult extends Rectangle implements Comparable<FindResult> {   
-//   int x;
-//   int y;
-//   int width;
-//   int height;
-   double score;  
-   
-//   public boolean equals(FindResult r){
-//      return (x == r.x && y == r.y && width == r.width && height == r.height); 
-//   }
-   
-   public String toString(){
-      return "x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", score=" + score;
-   }
-
-   @Override
-   public int compareTo(FindResult o) {
-      if (score - o.score < 0){
-         return -1;
-      }else if (score - o.score > 0){
-         return 1;
-      }else{
-         return 0;
-      }
-   }
-}
-
-
 
 class MatchFetcher {
    IplImage resultMatrix;
