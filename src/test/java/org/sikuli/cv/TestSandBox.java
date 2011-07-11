@@ -40,9 +40,9 @@ import com.googlecode.javacpp.Loader;
 import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
-public class TemplateFinderTest  extends TestCase {
+public class TestSandBox  extends TestCase {
 
-   static Logger logger = Logger.getLogger(TemplateFinderTest.class);
+   static Logger logger = Logger.getLogger(TestSandBox.class);
    static {
       BasicConfigurator.configure();
    }
