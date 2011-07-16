@@ -107,7 +107,7 @@ public class FinderTestSuite extends TestCase {
          BufferedImage target1 = ImageIO.read(new File(root,"target1.png"));
          
          TemplateFinder f = new TemplateFinder();
-         FindResult[] rs = f.findSimilarMatches(input, target1, 1000, 0.5);
+         FindResult[] rs = f.findSimilarMatches(input, target1, 1000, 0.0f);
          assertThat(rs.length, equalTo(1000));
 
       }
@@ -379,7 +379,7 @@ class FindSimilarMatchesTestCase extends TestCase {
       
       // test with a very low similarity threshold
       
-      float minSimilarity = 0.5f;
+      float minSimilarity = 0.01f;
 
       FindResult[] results = f.findSimilarMatches(inputImage, targetImage, k+10, minSimilarity);
 

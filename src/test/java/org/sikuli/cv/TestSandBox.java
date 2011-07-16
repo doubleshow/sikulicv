@@ -10,18 +10,32 @@ import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
 import static com.googlecode.javacv.cpp.opencv_imgproc.*;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JWindow;
 
 import junit.framework.TestCase;
@@ -38,7 +52,12 @@ import org.sikuli.cv.BaseTemplateFinder;
 
 import com.googlecode.javacpp.Loader;
 import com.googlecode.javacv.CanvasFrame;
+import com.googlecode.javacv.OpenKinectFrameGrabber;
+import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
+
 
 public class TestSandBox  extends TestCase {
 
@@ -53,6 +72,134 @@ public class TestSandBox  extends TestCase {
       g.drawImage(src, 0, 0, (int)rect.getWidth(), (int)rect.getHeight(), (int)rect.getX(), (int)rect.getY(),  (int)rect.getX() +  (int)rect.getWidth(),  (int)rect.getY() + (int)rect.getHeight(), null);
       g.dispose();
       return dest;
+   }
+   
+   
+   ///class RawDepthImage extends IplImage {
+      
+      //IplImage iplImage;
+      
+      public void writeToFile(IplImage iplImage, File file) throws IOException{         
+         ByteBuffer bb = iplImage.getByteBuffer();
+         FileChannel wChannel = new FileOutputStream(file).getChannel();
+         wChannel.write(bb);
+         wChannel.close();
+      }
+      
+      public IplImage readFromFile(File file) throws IOException{
+         IplImage imgin = IplImage.create(cvSize(640,480), 16, 1);
+         ByteBuffer bbin = imgin.getByteBuffer();         
+         FileChannel rChannel = new FileInputStream(file).getChannel();
+         rChannel.read(bbin);
+         rChannel.close();
+         return imgin;
+      }
+      
+  // }
+   
+   @Test
+   public void testSaveDepthImage() throws Exception {
+
+      OpenKinectFrameGrabber fg = new OpenKinectFrameGrabber(0);
+
+      fg.setFormat("depth");
+      fg.start();
+      IplImage img = fg.grab();
+      fg.stop();
+      
+      writeToFile(img, new File("test.depth"));
+      IplImage imgin = readFromFile(new File("test.depth"));
+      
+      ByteBuffer bb = img.getByteBuffer();
+      ByteBuffer bbin = imgin.getByteBuffer();
+      
+      while (bb.hasRemaining()){
+         int a = bb.get();
+         int b = bbin.get();
+         assertEquals(a,b);         
+      }
+      
+   }
+   
+   @Test
+   public void testKinect() throws InterruptedException {
+      
+     OpenKinectFrameGrabber fg = new OpenKinectFrameGrabber(0);
+     OpenKinectFrameGrabber fg2 = new OpenKinectFrameGrabber(0);
+     
+     try {
+      fg.setFormat("depth");
+      fg.start();
+      fg2.start();
+   } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+   }
+     
+     IplImage img = null;
+   try {
+      img = fg.grab();
+   } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+   }
+     BufferedImage bf = img.getBufferedImage();
+     
+     
+     ImageIcon icon = new ImageIcon(bf);
+     icon.setImage(bf);
+     JLabel l = new JLabel(icon);
+     l.setSize(new Dimension(640,480));
+
+     ImageIcon icon1 = new ImageIcon(bf);
+     JLabel l1 = new JLabel(icon1);
+     l.setSize(new Dimension(640,480));
+
+     
+     JFrame f = new JFrame();
+     f.setSize(new Dimension(1400,500));
+     f.setLayout(new BoxLayout(f.getContentPane(),BoxLayout.X_AXIS));
+     f.add(l);
+     f.add(l1);
+     f.setVisible(true);
+     
+     
+     IplImage color = null;
+     boolean forever = true;
+     while (forever){
+        
+        Thread.sleep(100);
+        
+        try {
+         img = fg.grab();
+         color = fg2.grab();
+         
+         // this is how we get the correct depth value in java
+//         ByteBuffer bb = img.getByteBuffer();
+//         ShortBuffer b = bb.order(ByteOrder.BIG_ENDIAN).asShortBuffer();
+//         while (b.hasRemaining()){
+//            System.out.println(""+b.get());
+//         }
+         
+
+         
+         bf = img.getBufferedImage();         
+         icon.setImage(bf);
+         icon1.setImage(color.getBufferedImage());
+         l.repaint();
+         l1.repaint();
+
+      } catch (Exception e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+        //img.release();        
+     }
+     
+     Object lock = new Object();     
+     synchronized(lock){
+        lock.wait();
+     }
    }
    
    @Test

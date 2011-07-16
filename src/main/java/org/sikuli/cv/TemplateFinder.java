@@ -40,7 +40,7 @@ public class TemplateFinder {
    }
       
    public FindResult findFirstGoodMatch(BufferedImage inputImage, BufferedImage targetImage){
-      FindResult[] results = findSimilarMatches(inputImage, targetImage, 1, 0.99);
+      FindResult[] results = findSimilarMatches(inputImage, targetImage, 1, 0.995);
       if (results.length > 0){
          return results[0];
       }else{
@@ -84,7 +84,7 @@ public class TemplateFinder {
       return r;
    }
    
-   public   FindResult findFirstMatch(BufferedImage inputImage, BufferedImage targetImage){
+   public FindResult findFirstMatch(BufferedImage inputImage, BufferedImage targetImage){
       
       if (inputImage.getWidth() < targetImage.getWidth() ||
          inputImage.getHeight() < targetImage.getHeight())
@@ -93,7 +93,7 @@ public class TemplateFinder {
       IplImage inputGray = createGrayScaleIplImage(inputImage);
       IplImage targetGray = createGrayScaleIplImage(targetImage);
       
-      FindResult r = findFirstMatch(inputGray, targetGray);
+      FindResult r = findFirstMatch1(inputGray, targetGray);
       
       inputGray.release();
       targetGray.release();      
@@ -109,12 +109,17 @@ public class TemplateFinder {
          
          //FindResult[] topResults = tm.findTopKMatches(input, target, factor, k);
          FindResult[] topResults = tm.findTopKMatches(input, target, factor, k);
-//         FindResult top = topResults[0];
-//         
+         
+//         FindResult top = topResults[0];       
 //         if (top.score < REMATCH_THRESHOLD){
 //            topResults = tm.findTopKMatches(input, target, factor*0.25, k);
 //         }
-         
+//
+//         top = topResults[0];       
+//         if (top.score < REMATCH_THRESHOLD){
+//            topResults = tm.findTopKMatches(input, target, 1.0f, k);
+//         }
+
          
          ArrayList<FindResult> filteredResults = new ArrayList<FindResult>();
          for (FindResult r : topResults){
@@ -145,7 +150,7 @@ public class TemplateFinder {
    }
 
 
-   private FindResult findFirstMatch(IplImage input, IplImage target){
+   private FindResult findFirstMatch1(IplImage input, IplImage target){
 
       double factor = Math.min(target.height() * 1.0 / MIM_TARGET_DIMENSION, 
          target.width() * 1.0 / MIM_TARGET_DIMENSION);
@@ -199,7 +204,7 @@ class BaseTemplateFinder {
       }
       
       IplImage map = IplImage.create(cvSize(iwidth,iheight), 32, 1);      
-      opencv_imgproc.cvMatchTemplate(input, target, map, CV_TM_CCORR_NORMED);
+      opencv_imgproc.cvMatchTemplate(input, target, map, CV_TM_CCOEFF_NORMED);
       return map;
    }
    
