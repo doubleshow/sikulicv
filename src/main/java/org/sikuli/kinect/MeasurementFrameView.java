@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -55,11 +57,29 @@ class MeasurementFrameView extends JPanel {
       
       overlay.removeAll();
       for (Measurement m : frame.getMeasurements()){        
-         overlay.add(MeasurementViewFactory.createView(m),0);         
+         addNewMeasurementView((LengthMeasurement) m);         
       }
       repaint();
    }
    
+   
+   void addNewMeasurementView(final LengthMeasurement newMeasurement){
+      final LengthMeasurement.View view = newMeasurement.new View();
+      view.groundTruthLabel.addKeyListener(new KeyAdapter(){
+         @Override
+         public void keyPressed(KeyEvent e){
+            System.out.println("removed");
+            if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+               _frame.getMeasurements().remove(newMeasurement);
+               overlay.remove(view);
+               repaint();
+            }
+         }
+      });
+
+      overlay.add(view,0);
+
+   }
    
    LineSelector selector = new LineSelector();
    class LineSelector extends MouseAdapter {
@@ -97,7 +117,25 @@ class MeasurementFrameView extends JPanel {
             newMeasurement = new LengthMeasurement();
             newMeasurement.setStartPoint(startPoint);
             newMeasurement.setEndPoint(endPoint);
-            overlay.add(MeasurementViewFactory.createView(newMeasurement),0);            
+            
+            addNewMeasurementView(newMeasurement);
+            
+//            final LengthMeasurement.View view = newMeasurement.new View();
+//            view.groundTruthLabel.addKeyListener(new KeyAdapter(){
+//               @Override
+//               public void keyPressed(KeyEvent e){
+//                  System.out.println("removed");
+//                  if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+//                     _frame.getMeasurements().remove(newMeasurement);
+//                     overlay.remove(view);
+//                  }
+//               }
+//            });
+//
+//            overlay.add(view,0);
+            
+            
+            
             repaint();
 
             requestFocus();

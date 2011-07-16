@@ -10,6 +10,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -221,11 +222,31 @@ class LengthMeasurement extends Measurement {
          view.refresh();
       }
    }
+   
 
    
    List<View> views = new ArrayList<View>();
-        
+   static View selectedView = null;
+   
    class View extends JPanel {
+      
+      void setSelected(boolean selected){
+         
+         if (selected){
+            
+            if (selectedView != null && selectedView != this){
+               selectedView.setSelected(false);
+            }
+            
+            selectedView = this;
+            measurementLine.setForeground(Color.white);               
+            
+         }else{
+            measurementLine.setForeground(Color.red);
+         }
+         repaint();
+      }
+
 
       GroundTruthLabel groundTruthLabel = new GroundTruthLabel();
       class GroundTruthLabel extends JLabel{
@@ -234,9 +255,32 @@ class LengthMeasurement extends Measurement {
             
             setName("GroundTruthLabel_" + startPoint.x + "_" + startPoint.y);
 
-            
+            setFocusable(true);
             setBackground(Color.yellow);
             setOpaque(true);
+            
+            addFocusListener(new FocusListener(){
+
+               @Override
+               public void focusGained(FocusEvent arg0) {
+               }
+
+               @Override
+               public void focusLost(FocusEvent arg0) {
+                  setSelected(false);
+               }
+               
+            });
+
+            addKeyListener(new KeyAdapter(){
+               @Override
+               public void keyPressed(KeyEvent e){
+                  if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+                     //editCompleted();
+                  }
+               }
+
+            });
             
             addMouseListener(new MouseAdapter(){
                
@@ -246,6 +290,9 @@ class LengthMeasurement extends Measurement {
                      groundTruthEditor.setText(""+groundTruth);
                      groundTruthEditor.setVisible(true);
                      groundTruthEditor.requestFocus();
+                  }else if (e.getClickCount() == 1){                     
+                     setSelected(true);
+                     requestFocus();
                   }
                }
                
@@ -303,8 +350,7 @@ class LengthMeasurement extends Measurement {
          MeasurementLine(){
             setOpaque(false);
             setName("MeasurementLine_" + startPoint.x + "_" + startPoint.y);   
-            
-
+            setForeground(Color.red);
          }
          
          @Override
@@ -312,7 +358,7 @@ class LengthMeasurement extends Measurement {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(3.0f));
-            g2d.setColor(Color.red);
+            g2d.setColor(getForeground());
             
             
             Rectangle r = getBounds();
