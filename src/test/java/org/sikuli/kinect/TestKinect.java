@@ -9,13 +9,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -24,14 +17,7 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.ListCellRenderer;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,189 +30,30 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 //@RunWith(Enclosed.class)
 
-class MeasurementFileListView extends JList {
-   
-   MeasurementFileListView(MeasurementFile measurementCase){
-      this();
-      setListData(measurementCase.frames.toArray());        
-   }
-   
-   MeasurementFileListView(){      
-      setCellRenderer(new MeasurementFrameCellRenderer());
-   }
-   
-   
-   class VideoFrameThumbView extends VideoFrameView{
-      
-      
-      @Override
-      public void paintChildren(Graphics g0){
-         Graphics2D g = (Graphics2D) g0;
-           
-           Dimension size = getSize();
-           Dimension contentSize = new Dimension(640,480);
-          
-           float scalex = 1f* size.width / contentSize.width;
-           float scaley = 1f* size.height / contentSize.height;
-           float minscale = Math.min(scalex,scaley);
-
-           int height = (int) (contentSize.height * minscale);
-           int width = (int) (contentSize.width * minscale);
-
-           int x = size.width/2 - width/2;
-           int y = size.height/2 - height/2; 
-           
-           g.translate(x,y);
-           g.scale(minscale,minscale);
-           
-           super.paintChildren(g);
-      }
-   }
-   
-
-   class MeasurementFrameCellRenderer extends JPanel implements ListCellRenderer {
-      VideoFrameView _thumbView = new VideoFrameThumbView();
-      
-      MeasurementFrameCellRenderer(){         
-         setLayout(new GridBagLayout());
-         setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-         
-         _thumbView.setPreferredSize(new Dimension(100,100));        
-         
-         GridBagConstraints c = new GridBagConstraints();
-         c.anchor = GridBagConstraints.CENTER;
-         add(_thumbView,c);
-         validate();
-      }
-
-      public Component getListCellRendererComponent(
-        JList list,              // the list
-        Object value,            // value to display
-        int index,               // cell index
-        boolean isSelected,      // is the cell selected
-        boolean cellHasFocus)    // does the cell have focus
-      {
-         
-         MeasurementFrame frame = (MeasurementFrame) value;
-         VideoFrame vFrame = frame.dualVideoFrame.getDepthFrame();
-         _thumbView.setVideoFrame(vFrame);        
-         
-         setPreferredSize(new Dimension(150,150));
-         
-         if (isSelected){
-            setBorder(BorderFactory.createLineBorder(Color.red, 5));
-         }else{
-            setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-         }
-         
-          return this;
-      }
-
- 
-  }
-}
-
-
-class MainFrame extends JFrame {
-   
-   MeasurementFileListView fileListView;
-   MeasurementFrameView frameView;
-   
-   MainFrame(){
-      
-      fileListView = new MeasurementFileListView();
-      fileListView.addListSelectionListener(new ListSelectionListener(){
-
-         @Override
-         public void valueChanged(ListSelectionEvent e) {
-            int index = fileListView.getSelectedIndex();
-            selectFrameByIndex(index);
-         }
-         
-      });
-      
-      
-      frameView = new MeasurementFrameView();
-      
-      JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, fileListView, frameView);
-      add(splitPane);
-      
-      
-      setResizable(false);
-   }
-   
-   void selectFrameByIndex(int index){
-      frameView.setMeasurementFrame(file.frames.get(index));      
-   }
-   
-   MeasurementFile file;
-   void setMeasurementCase(MeasurementFile file){
-      this.file = file;
-      fileListView.setListData(file.frames.toArray());
-      fileListView.setSelectedIndex(0);
-      selectFrameByIndex(0);
-   }
-   
-}
-
-class MeasurementFrameView extends JPanel {
-   
-   VideoFrameView frameView = new VideoFrameView();
-   JPanel overlay = new JPanel();
-   
-   MeasurementFrameView(){
-      setLayout(null);
-      
-      overlay.setSize(640,480);
-      overlay.setOpaque(false);
-      overlay.setLayout(null);
-      
-      add(frameView);
-      add(overlay,0);
-      
-      setPreferredSize(new Dimension(640,480));
-      setSize(640,480);
-   }
-   
-   void setMeasurementFrame(MeasurementFrame frame){
-      
-      frameView.setVideoFrame(frame.dualVideoFrame.getDepthFrame());
-      frameView.setSize(640,480);
-      
-      overlay.removeAll();
-      for (Measurement m : frame.measurements){        
-         overlay.add(MeasurementViewFactory.createView(m),0);         
-      }
-      repaint();
-   }
-   
-}
-
-//class MeasurementView extends JPanel {
-   
-   
-//}
-
-//class MeasurementFrameView extends DualFrameDebugViewer {
-//   MeasurementFrame frame; 
-//
-//   MeasurementFrameView(MeasurementFrame frame){
-//      setDualVideoFrame(frame.dualVideoFrame);
-//
-//      
-//      for (Measurement m : frame.measurements){        
-//         depthView.add(MeasurementViewFactory.createView(m),0);         
-//      }
-//   }     
-//}
-
-
 public class TestKinect {
 
    @Test
    public void testOpenKinectDualFrameGrabber() throws Exception {
 
       OpenKinectDualFrameGrabber grabber = new OpenKinectDualFrameGrabber();
+      grabber.start();
+
+      DualFrameDebugViewer viewer = new  DualFrameDebugViewer();
+      viewer.setDualFrameGrabber(grabber);
+      viewer.setVisible(true);
+      viewer.start();
+
+      Object lock = new Object();
+      synchronized(lock){
+         lock.wait();
+      }
+   }
+   
+   
+   @Test
+   public void testFakeKinect() throws Exception {
+
+      DualFrameGrabber grabber = new FakeKinectDualFrameGrabber();
       grabber.start();
 
       DualFrameDebugViewer viewer = new  DualFrameDebugViewer();
@@ -359,29 +186,29 @@ public class TestKinect {
       @Before
       public void setUp() throws IOException{
          lengthMeasurement.length = 100;
-         lengthMeasurement.groundTruthLength = 110;
+         lengthMeasurement.groundTruth = 110;
          lengthMeasurement.startPoint = new SelectionPoint(50,50);
          lengthMeasurement.endPoint = new SelectionPoint(150,250);
 
          anotherLengthMeasurement.length = 100;
-         anotherLengthMeasurement.groundTruthLength = 110;
+         anotherLengthMeasurement.groundTruth = 110;
          anotherLengthMeasurement.startPoint = new SelectionPoint(250,50);
          anotherLengthMeasurement.endPoint = new SelectionPoint(350,150);
          
          
          camera.name = "My Kinect";
 
-         measurementFrame.measurements.add(lengthMeasurement);
-         measurementFrame.measurements.add(anotherLengthMeasurement);
-         measurementFrame.dualVideoFrame = KinectDualVideoFrame.read(new File("color.png"), new File("depth.bin"));
+         measurementFrame.getMeasurements().add(lengthMeasurement);
+         measurementFrame.getMeasurements().add(anotherLengthMeasurement);
+         measurementFrame.setDualVideoFrame(KinectDualVideoFrame.read(new File("color.png"), new File("depth.bin")));
          
-         anotherMeasurementFrame.measurements.add(anotherLengthMeasurement);
-         anotherMeasurementFrame.dualVideoFrame = KinectDualVideoFrame.read(new File("color.png"), new File("depth.bin"));
+         anotherMeasurementFrame.getMeasurements().add(anotherLengthMeasurement);
+         anotherMeasurementFrame.setDualVideoFrame(KinectDualVideoFrame.read(new File("color.png"), new File("depth.bin")));
 
          measurementCase.camera = camera;
          measurementCase.name = "iPad";
-         measurementCase.frames.add(measurementFrame);
-         measurementCase.frames.add(anotherMeasurementFrame);
+         measurementCase.getMeasurementFrames().add(measurementFrame);
+         measurementCase.getMeasurementFrames().add(anotherMeasurementFrame);
 
       }
 
@@ -389,8 +216,8 @@ public class TestKinect {
       @Test
       public void testMain() throws InterruptedException{
          
-         MainFrame f = new MainFrame();
-         f.setMeasurementCase(measurementCase);
+         KinectMeasureMainFrame f = new KinectMeasureMainFrame();
+         f.setMeasurementFile(measurementCase);
          f.setVisible(true);
          f.pack();
          
@@ -477,7 +304,7 @@ public class TestKinect {
             }            
          });
 
-         assertEquals(pngs.length, measurementCase.frames.size());
+         assertEquals(pngs.length, measurementCase.getMeasurementFrames().size());
 
          MeasurementFile loadedCase = MeasurementFile.readFromBundle(bundlePath);
       }
