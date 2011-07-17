@@ -18,6 +18,7 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
@@ -27,31 +28,81 @@ class MeasurementFrameView extends JPanel {
    VideoFrameView frameView = new VideoFrameView();
    JPanel overlay = new JPanel();
    
+   DepthProbe depthProbe = new DepthProbe();
+   class DepthProbe extends JPanel {
+      
+      JLabel contentLabel = new JLabel();
+      
+      DepthProbe(){         
+         setLayout(null);
+         setBackground(new Color(0,0,0,0.5f));
+         setOpaque(true);
+         add(contentLabel);
+      }
+      
+      void updateDepthValue(int depthValue, double distance){
+         contentLabel.setText("<html><div style='color:white'>depth: "+depthValue+"<br>" +
+               "distance: " + String.format("%.3f", distance) + 
+               "</div></html>");
+         contentLabel.setSize(contentLabel.getPreferredSize());
+         setSize(contentLabel.getPreferredSize());
+      }
+      
+   }
+   
    MeasurementFrameView(){
       setLayout(null);
       setFocusable(true);
+      setPreferredSize(new Dimension(640,480));
+      setSize(640,480);      
+      setName("MeasurementFrameView");
+      setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+          
+      add(frameView);
+      add(overlay,0);
+      add(depthProbe,0);
       
       overlay.setSize(640,480);
       overlay.setOpaque(false);
       overlay.setLayout(null);
       
-      add(frameView);
-      add(overlay,0);
-      
-      setPreferredSize(new Dimension(640,480));
-      setSize(640,480);
-      
-      setName("MeasurementFrameView");
-      
       frameView.setSize(640,480);
       frameView.addMouseListener(selector);
       frameView.addMouseMotionListener(selector);
-      frameView.setFocusable(true);
+      frameView.setFocusable(true);      
+      
+      frameView.addMouseListener(new MouseAdapter(){
+         @Override
+         public void mouseExited(MouseEvent e){
+            depthProbe.setVisible(false);
+         }
+         @Override
+         public void mouseEntered(MouseEvent e){
+            depthProbe.setVisible(true);
+         }
+      });
+      frameView.addMouseMotionListener(new MouseAdapter(){
+                  
+         @Override
+         public void mouseMoved(MouseEvent e){
+            
+            DepthVideoFrame depthFrame = _measurementFrame.getDualVideoFrame().getDepthFrame();
+            int depthValue = depthFrame.getDepthValue(e.getPoint().x,e.getPoint().y);
+            double distance = depthFrame.getDistanceTo(e.getPoint().x,e.getPoint().y);
+            
+            depthProbe.updateDepthValue(depthValue,distance);            
+            depthProbe.setLocation(e.getPoint().x,e.getPoint().y-depthProbe.getSize().height - 10);
+
+         }
+         
+      });
+      
    }
+
    
-   MeasurementFrame _frame;
+   MeasurementFrame _measurementFrame;
    void setMeasurementFrame(MeasurementFrame frame){
-      this._frame = frame;
+      this._measurementFrame = frame;
       
       frameView.setVideoFrame(frame.getDualVideoFrame().getDepthFrame());
       
@@ -68,9 +119,8 @@ class MeasurementFrameView extends JPanel {
       view.groundTruthLabel.addKeyListener(new KeyAdapter(){
          @Override
          public void keyPressed(KeyEvent e){
-            System.out.println("removed");
             if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
-               _frame.getMeasurements().remove(newMeasurement);
+               _measurementFrame.getMeasurements().remove(newMeasurement);
                overlay.remove(view);
                repaint();
             }
@@ -95,7 +145,7 @@ class MeasurementFrameView extends JPanel {
          public void mouseClicked(MouseEvent e) {
             endPoint = e.getPoint();
 
-            _frame.getMeasurements().add(newMeasurement);
+            _measurementFrame.getMeasurements().add(newMeasurement);
             
             userEventAdapter = userSelectingStartPoint;
          }

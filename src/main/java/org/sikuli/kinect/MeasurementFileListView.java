@@ -60,7 +60,7 @@ class MeasurementFileListView extends JList {
          setLayout(new GridBagLayout());
          setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
          
-         _thumbView.setPreferredSize(new Dimension(100,100));        
+         _thumbView.setPreferredSize(new Dimension(140,140));        
          
          GridBagConstraints c = new GridBagConstraints();
          c.anchor = GridBagConstraints.CENTER;

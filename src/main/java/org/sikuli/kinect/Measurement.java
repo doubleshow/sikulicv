@@ -2,6 +2,7 @@ package org.sikuli.kinect;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -22,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -56,21 +58,21 @@ class Measurement{
 class Camera {
    
    @Attribute
-   String name;
+   String name = "";
 }
 
 @Root
 class MeasurementFile {
    
    @Element
-   Camera camera;
+   Camera camera = new Camera();
    
    @ElementList
    private
    List<MeasurementFrame> frames = new ArrayList<MeasurementFrame>();   
    
    @Attribute
-   String name;  
+   String name = "";  
    
    void saveToBundle(File bundlePath) throws Exception{
       //if (bundlePath)
@@ -258,6 +260,8 @@ class LengthMeasurement extends Measurement {
             setFocusable(true);
             setBackground(Color.yellow);
             setOpaque(true);
+            setBorder(BorderFactory.createLineBorder(Color.black,1));
+            //setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             
             addFocusListener(new FocusListener(){
 
@@ -398,7 +402,7 @@ class LengthMeasurement extends Measurement {
          groundTruthEditor.setVisible(false);
          groundTruthEditor.setText("Text");
          groundTruthEditor.setSize(groundTruthEditor.getPreferredSize());
-         groundTruthEditor.setLocation(startPoint.asPoint());
+         
          
          add(groundTruthEditor);
          add(groundTruthLabel);
@@ -420,7 +424,12 @@ class LengthMeasurement extends Measurement {
                      
          groundTruthLabel.setText(""+groundTruth);
          groundTruthLabel.setSize(groundTruthLabel.getPreferredSize());
-         groundTruthLabel.setLocation(startPoint.asPoint());
+         
+         int x = (startPoint.asPoint().x + endPoint.asPoint().x)/2;
+         int y = (startPoint.asPoint().y + endPoint.asPoint().y)/2;
+         groundTruthLabel.setLocation(x,y);
+         
+         groundTruthEditor.setLocation(groundTruthLabel.getLocation());
          
          repaint();
       }      

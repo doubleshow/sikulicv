@@ -45,6 +45,56 @@ public class KinectMeasureTest {
    private JListFixture listView;
    private JButtonFixture captureButton;
    
+   static public class EmptyStartupTest {
+      
+      private KinectMeasureMainFrame main;
+      private FrameFixture window;
+      private JButtonFixture captureButton;
+      private JPanelFixture captureView;
+      private JPanelFixture measureView;
+      private JListFixture listView;
+      
+      @Before public void setUp() throws Exception{
+         
+         main = GuiActionRunner.execute(new GuiQuery<KinectMeasureMainFrame>() {
+             protected KinectMeasureMainFrame executeInEDT() {
+               return new KinectMeasureMainFrame();  
+             }
+         });
+         
+         main.setDualFrameGrabber(new FakeKinectDualFrameGrabber());
+         
+         window = new FrameFixture(main);
+         window.show(); // shows the frame to test
+         
+//         listView = window.list("MeasurementFileListView");
+//         measureView = window.panel("MeasurementFrameView");
+         captureButton = window.button("Capture");
+      }
+      
+      @Test
+      public void testCaptureFirstFrame(){         
+         captureButton.click();   
+         captureView = window.panel("CaptureView");
+         captureView.doubleClick();
+         
+         assertThat(main.getMeasurementFile().getMeasurementFrames().size(), equalTo(1));
+      }
+
+      @Test
+      public void testManually() throws InterruptedException{         
+         //captureButton.click();   
+         //window.menuItem("Save").click();
+         window.menuItem("Open").click();
+         Object lock = new Object();
+         synchronized(lock){
+            lock.wait();
+         }
+      }
+
+   }
+   
+   
    @Before
    public void setUp() throws Exception{
       
@@ -67,7 +117,7 @@ public class KinectMeasureTest {
       listView = window.list("MeasurementFileListView");
       measureView = window.panel("MeasurementFrameView");
       captureButton = window.button("Capture");
-   }
+   }   
    
    @Test
    public void testManually() throws InterruptedException{
